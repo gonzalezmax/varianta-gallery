@@ -1,5 +1,5 @@
-
 import { supabase } from "@/integrations/supabase/client";
+import type { Database } from "@/integrations/supabase/types";
 
 export type Product = {
   id: string;
@@ -24,7 +24,7 @@ export type Review = {
   id: string;
   productId: string;
   userName: string;
-  userImage?: string;
+  userImage: string | null;
   rating: number;
   date: string;
   title: string;
@@ -216,8 +216,16 @@ export const products: Product[] = [
   }
 ];
 
-// Initial/default reviews
-const defaultReviews: Review[] = [
+export const categories = [
+  "All",
+  "Footwear",
+  "Apparel",
+  "Electronics",
+  "Accessories",
+  "Home"
+];
+
+const mockReviews: Review[] = [
   {
     id: "r1",
     productId: "p1",
@@ -280,17 +288,7 @@ const defaultReviews: Review[] = [
   }
 ];
 
-export const categories = [
-  "All",
-  "Footwear",
-  "Apparel",
-  "Electronics",
-  "Accessories",
-  "Home"
-];
-
-// Get reviews from Supabase
-const getReviews = async (): Promise<Review[]> => {
+export const getReviews = async (): Promise<Review[]> => {
   try {
     const { data, error } = await supabase
       .from('reviews')
@@ -319,7 +317,6 @@ const getReviews = async (): Promise<Review[]> => {
   }
 };
 
-// Add a new review to Supabase
 export const addReview = async (review: Review): Promise<Review[]> => {
   try {
     const { error } = await supabase
@@ -341,8 +338,7 @@ export const addReview = async (review: Review): Promise<Review[]> => {
       return [];
     }
     
-    // After inserting, get all reviews again to return the updated list
-    return getProductReviews(review.productId);
+    return await getProductReviews(review.productId);
   } catch (error) {
     console.error('Error in addReview:', error);
     return [];
@@ -367,37 +363,47 @@ export async function getProductReviews(productId: string): Promise<Review[]> {
     const { data, error } = await supabase
       .from('reviews')
       .select('*')
-      .eq('product_id', productId)
-      .order('created_at', { ascending: false });
-    
+      .eq('product_id', productId);
+      
     if (error) {
-      console.error('Error fetching product reviews:', error);
-      return [];
+      console.error("Error fetching reviews from Supabase:", error);
+      return mockReviews.filter(review => review.productId === productId);
     }
     
-    return data.map((review: any) => ({
-      id: review.id,
-      productId: review.product_id,
-      userName: review.user_name,
-      userImage: review.user_image,
-      rating: review.rating,
-      date: review.date,
-      title: review.title,
-      comment: review.comment,
-      recommended: review.recommended,
-      verified: review.verified
-    }));
+    if (data && data.length > 0) {
+      return data.map(item => ({
+        id: item.id,
+        productId: item.product_id,
+        userName: item.user_name,
+        userImage: item.user_image,
+        rating: item.rating,
+        date: item.date,
+        title: item.title,
+        comment: item.comment,
+        recommended: item.recommended,
+        verified: item.verified
+      }));
+    } else {
+      return mockReviews.filter(review => review.productId === productId);
+    }
   } catch (error) {
-    console.error('Error in getProductReviews:', error);
-    return [];
+    console.error("Error in getProductReviews:", error);
+    return mockReviews.filter(review => review.productId === productId);
   }
 }
 
-// Helper function to recalculate product rating based on reviews
-export async function recalculateProductRating(productId: string): Promise<number> {
-  const productReviews = await getProductReviews(productId);
-  if (productReviews.length === 0) return 0;
-  
-  const sum = productReviews.reduce((total, review) => total + review.rating, 0);
-  return parseFloat((sum / productReviews.length).toFixed(1));
-}
+export const getAverageRating = async (productId: string): Promise<number> => {
+  try {
+    const reviews = await getProductReviews(productId);
+    
+    if (reviews.length === 0) {
+      return 0;
+    }
+    
+    const sum = reviews.reduce((total, review) => total + review.rating, 0);
+    return Math.round((sum / reviews.length) * 10) / 10;
+  } catch (error) {
+    console.error("Error calculating average rating:", error);
+    return 0;
+  }
+};

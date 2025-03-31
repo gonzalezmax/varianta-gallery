@@ -22,6 +22,9 @@ const SignIn = () => {
               socialButtonsBlockButton: "border rounded-md",
             },
           }}
+          socialAuth={{
+            strategy: "google",
+          }}
         />
       </div>
     </div>
