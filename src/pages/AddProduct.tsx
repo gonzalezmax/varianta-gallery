@@ -1,4 +1,3 @@
-
 import React, { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
@@ -214,6 +213,8 @@ const AddProduct = () => {
           bestseller: data.bestseller,
           on_sale: data.onSale,
           discount: data.onSale ? data.discount : null,
+          rating: 0,
+          review_count: 0
         })
         .select();
 

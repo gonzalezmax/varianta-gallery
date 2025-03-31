@@ -291,6 +291,7 @@ const mockReviews: Review[] = [
 
 export async function getAllProducts(): Promise<Product[]> {
   try {
+    // Get user-submitted products
     const { data: userProducts, error: userProductsError } = await supabase
       .from("user_products")
       .select("*");
@@ -300,12 +301,13 @@ export async function getAllProducts(): Promise<Product[]> {
       return products;
     }
 
-    const userProductIds = userProducts.map(p => p.id);
+    const userProductIds = userProducts?.map(p => p.id) || [];
     
     if (userProductIds.length === 0) {
       return products;
     }
 
+    // Get product images
     const { data: productImages, error: imagesError } = await supabase
       .from("product_images")
       .select("*")
@@ -315,6 +317,7 @@ export async function getAllProducts(): Promise<Product[]> {
       console.error("Error fetching product images:", imagesError);
     }
 
+    // Get product colors
     const { data: productColors, error: colorsError } = await supabase
       .from("product_colors")
       .select("*")
@@ -324,6 +327,7 @@ export async function getAllProducts(): Promise<Product[]> {
       console.error("Error fetching product colors:", colorsError);
     }
 
+    // Get product sizes
     const { data: productSizes, error: sizesError } = await supabase
       .from("product_sizes")
       .select("*")
@@ -333,6 +337,7 @@ export async function getAllProducts(): Promise<Product[]> {
       console.error("Error fetching product sizes:", sizesError);
     }
 
+    // Get product tags
     const { data: productTags, error: tagsError } = await supabase
       .from("product_tags")
       .select("*")
@@ -342,6 +347,7 @@ export async function getAllProducts(): Promise<Product[]> {
       console.error("Error fetching product tags:", tagsError);
     }
 
+    // Format user products to match the Product type
     const formattedUserProducts = userProducts.map(product => {
       const images = productImages
         ? productImages
@@ -403,6 +409,7 @@ export async function getProductById(id: string): Promise<Product | undefined> {
   }
 
   try {
+    // Get user product
     const { data: product, error: productError } = await supabase
       .from("user_products")
       .select("*")
@@ -414,6 +421,7 @@ export async function getProductById(id: string): Promise<Product | undefined> {
       return undefined;
     }
 
+    // Get product images
     const { data: images, error: imagesError } = await supabase
       .from("product_images")
       .select("*")
@@ -424,6 +432,7 @@ export async function getProductById(id: string): Promise<Product | undefined> {
       console.error("Error fetching product images:", imagesError);
     }
 
+    // Get product colors
     const { data: colors, error: colorsError } = await supabase
       .from("product_colors")
       .select("*")
@@ -433,6 +442,7 @@ export async function getProductById(id: string): Promise<Product | undefined> {
       console.error("Error fetching product colors:", colorsError);
     }
 
+    // Get product sizes
     const { data: sizes, error: sizesError } = await supabase
       .from("product_sizes")
       .select("*")
@@ -442,6 +452,7 @@ export async function getProductById(id: string): Promise<Product | undefined> {
       console.error("Error fetching product sizes:", sizesError);
     }
 
+    // Get product tags
     const { data: tags, error: tagsError } = await supabase
       .from("product_tags")
       .select("*")
@@ -476,7 +487,7 @@ export async function getProductById(id: string): Promise<Product | undefined> {
   }
 }
 
-export function getRelatedProducts(product: Product, limit: number = 4): Promise<Product[]> {
+export async function getRelatedProducts(product: Product, limit: number = 4): Promise<Product[]> {
   return getAllProducts().then(allProducts => {
     return allProducts
       .filter(p => 
@@ -543,10 +554,6 @@ export const addReview = async (review: Review): Promise<Review[]> => {
     return [];
   }
 };
-
-export function getProductById(id: string): Product | undefined {
-  return products.find(product => product.id === id);
-}
 
 export async function getProductReviews(productId: string): Promise<Review[]> {
   try {

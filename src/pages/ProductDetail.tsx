@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
-import { getProductById, getProductReviews, getRelatedProducts, addReview, Review } from "@/data/products";
+import { getProductById, getProductReviews, getRelatedProducts, addReview, Review, Product } from "@/data/products";
 import { useCart } from "@/context/CartContext";
 import ProductCard from "@/components/ProductCard";
 import Rating from "@/components/Rating";
@@ -16,16 +16,48 @@ const ProductDetail = () => {
   const navigate = useNavigate();
   const { addToCart } = useCart();
 
-  const product = id ? getProductById(id) : undefined;
-  const relatedProducts = product ? getRelatedProducts(product, 4) : [];
-
+  const [product, setProduct] = useState<Product | undefined>(undefined);
+  const [relatedProducts, setRelatedProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
   const [reviews, setReviews] = useState<Review[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedImage, setSelectedImage] = useState(0);
-  const [selectedColor, setSelectedColor] = useState(product?.colors?.[0]?.name || "");
-  const [selectedSize, setSelectedSize] = useState(product?.sizes?.[0] || "");
+  const [selectedColor, setSelectedColor] = useState("");
+  const [selectedSize, setSelectedSize] = useState("");
   const [quantity, setQuantity] = useState(1);
   const [showReviewForm, setShowReviewForm] = useState(false);
+
+  useEffect(() => {
+    const fetchProduct = async () => {
+      if (id) {
+        setLoading(true);
+        try {
+          const productData = await getProductById(id);
+          setProduct(productData);
+          
+          if (productData) {
+            if (productData.colors && productData.colors.length > 0) {
+              setSelectedColor(productData.colors[0].name);
+            }
+            
+            if (productData.sizes && productData.sizes.length > 0) {
+              setSelectedSize(productData.sizes[0]);
+            }
+            
+            const relatedProductsData = await getRelatedProducts(productData, 4);
+            setRelatedProducts(relatedProductsData);
+          }
+        } catch (error) {
+          console.error("Error fetching product details:", error);
+          toast.error("Failed to load product details");
+        } finally {
+          setLoading(false);
+        }
+      }
+    };
+    
+    fetchProduct();
+  }, [id]);
 
   useEffect(() => {
     if (id) {
@@ -45,6 +77,14 @@ const ProductDetail = () => {
       fetchReviews();
     }
   }, [id]);
+
+  if (loading) {
+    return (
+      <div className="container mx-auto px-4 py-12 text-center">
+        <h1 className="text-2xl font-bold mb-4">Loading...</h1>
+      </div>
+    );
+  }
 
   if (!product) {
     return (
