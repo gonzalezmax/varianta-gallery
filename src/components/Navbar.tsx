@@ -1,14 +1,17 @@
 
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
-import { Search, ShoppingBag, User, Menu, X } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
+import { Search, ShoppingBag, User, Menu, X, LogIn } from "lucide-react";
 import { useCart } from "@/context/CartContext";
 import { Button } from "@/components/ui/button";
+import { useUser, UserButton, SignedIn, SignedOut } from "@clerk/clerk-react";
 
 const Navbar = () => {
   const { getCartCount } = useCart();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const { isLoaded, isSignedIn } = useUser();
+  const navigate = useNavigate();
 
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
   const toggleSearch = () => setIsSearchOpen(!isSearchOpen);
@@ -37,13 +40,28 @@ const Navbar = () => {
           >
             <Search size={20} />
           </button>
-          <Link 
-            to="/account" 
-            className="p-2 rounded-full hover:bg-gray-100 transition-colors hidden md:flex"
-            aria-label="Account"
-          >
-            <User size={20} />
-          </Link>
+          
+          <SignedIn>
+            <UserButton 
+              afterSignOutUrl="/"
+              appearance={{
+                elements: {
+                  userButtonBox: "p-2 rounded-full hover:bg-gray-100 transition-colors hidden md:flex",
+                }
+              }}
+            />
+          </SignedIn>
+          
+          <SignedOut>
+            <Link 
+              to="/sign-in" 
+              className="p-2 rounded-full hover:bg-gray-100 transition-colors hidden md:flex"
+              aria-label="Sign In"
+            >
+              <LogIn size={20} />
+            </Link>
+          </SignedOut>
+          
           <Link to="/cart" className="relative p-2 rounded-full hover:bg-gray-100 transition-colors">
             <ShoppingBag size={20} />
             {getCartCount() > 0 && (
@@ -101,13 +119,33 @@ const Navbar = () => {
             >
               Accessories
             </Link>
-            <Link 
-              to="/account" 
-              className="block py-2 text-sm font-medium hover:text-primary transition-colors"
-              onClick={() => setIsMenuOpen(false)}
-            >
-              Account
-            </Link>
+            
+            <SignedIn>
+              <Link 
+                to="/account" 
+                className="block py-2 text-sm font-medium hover:text-primary transition-colors"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                My Account
+              </Link>
+            </SignedIn>
+            
+            <SignedOut>
+              <Link 
+                to="/sign-in" 
+                className="block py-2 text-sm font-medium hover:text-primary transition-colors"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                Sign In
+              </Link>
+              <Link 
+                to="/sign-up" 
+                className="block py-2 text-sm font-medium hover:text-primary transition-colors"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                Create Account
+              </Link>
+            </SignedOut>
           </div>
         </div>
       )}
