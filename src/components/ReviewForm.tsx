@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
@@ -43,27 +42,24 @@ const ReviewForm: React.FC<ReviewFormProps> = ({ productId, onReviewSubmitted, o
   const selectedRating = form.watch("rating");
 
   const onSubmit = (data: ReviewFormValues) => {
-    // Create a new review object
     const newReview: Review = {
-      id: `r${Date.now()}`, // Generate a unique ID using timestamp
+      id: `r${Date.now()}`,
       productId,
-      userName: "You", // Default to "You" for the current user
+      userName: "You",
       rating: data.rating,
-      date: new Date().toISOString().split('T')[0], // Format: YYYY-MM-DD
+      date: new Date().toISOString().split('T')[0],
       title: data.title,
       comment: data.comment,
       recommended: data.recommended,
-      verified: true, // Assume the current user is verified
+      verified: true,
     };
     
     console.log("Submitting review:", newReview);
     
-    // Show success toast
     toast.success("Review submitted successfully", {
       description: "Thank you for your feedback!",
     });
     
-    // Pass the new review to parent component
     onReviewSubmitted(newReview);
   };
 
@@ -91,7 +87,6 @@ const ReviewForm: React.FC<ReviewFormProps> = ({ productId, onReviewSubmitted, o
       
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-          {/* Rating Stars */}
           <FormField
             control={form.control}
             name="rating"
@@ -108,7 +103,6 @@ const ReviewForm: React.FC<ReviewFormProps> = ({ productId, onReviewSubmitted, o
             )}
           />
           
-          {/* Review Title */}
           <FormField
             control={form.control}
             name="title"
@@ -123,7 +117,6 @@ const ReviewForm: React.FC<ReviewFormProps> = ({ productId, onReviewSubmitted, o
             )}
           />
           
-          {/* Review Comment */}
           <FormField
             control={form.control}
             name="comment"
@@ -142,7 +135,6 @@ const ReviewForm: React.FC<ReviewFormProps> = ({ productId, onReviewSubmitted, o
             )}
           />
           
-          {/* Recommendation Checkbox */}
           <FormField
             control={form.control}
             name="recommended"

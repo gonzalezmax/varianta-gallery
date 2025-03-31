@@ -1,11 +1,11 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Truck, Shield, RotateCcw, ChevronRight, ChevronDown, Heart, Share2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
-import { getProductById, getProductReviews, getRelatedProducts, Review } from "@/data/products";
+import { getProductById, getProductReviews, getRelatedProducts, addReview, Review } from "@/data/products";
 import { useCart } from "@/context/CartContext";
 import ProductCard from "@/components/ProductCard";
 import Rating from "@/components/Rating";
@@ -26,6 +26,12 @@ const ProductDetail = () => {
   const [selectedSize, setSelectedSize] = useState(product?.sizes?.[0] || "");
   const [quantity, setQuantity] = useState(1);
   const [showReviewForm, setShowReviewForm] = useState(false);
+
+  useEffect(() => {
+    if (id) {
+      setReviews(getProductReviews(id));
+    }
+  }, [id]);
 
   if (!product) {
     return (
@@ -61,13 +67,17 @@ const ProductDetail = () => {
   };
 
   const handleReviewSubmitted = (newReview: Review) => {
-    setReviews(prevReviews => [newReview, ...prevReviews]);
+    const updatedReviews = addReview(newReview);
+    setReviews(updatedReviews.filter(review => review.productId === id));
     setShowReviewForm(false);
+    
+    toast.success("Review submitted successfully", {
+      description: "Your review has been saved and will be visible even after refreshing the page.",
+    });
   };
 
   return (
     <div className="container mx-auto px-4 py-8">
-      {/* Breadcrumbs */}
       <div className="flex items-center text-sm text-gray-500 mb-6">
         <button onClick={() => navigate("/")} className="hover:text-primary transition-colors">Home</button>
         <ChevronRight size={16} className="mx-2" />
@@ -77,7 +87,6 @@ const ProductDetail = () => {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
-        {/* Product Images */}
         <div>
           <div className="relative aspect-square overflow-hidden rounded-lg mb-4">
             <img
@@ -121,7 +130,6 @@ const ProductDetail = () => {
           </div>
         </div>
 
-        {/* Product Info */}
         <div>
           <div className="mb-6">
             <h1 className="text-2xl sm:text-3xl font-bold mb-2">{product.name}</h1>
@@ -147,7 +155,6 @@ const ProductDetail = () => {
               {product.description}
             </p>
             
-            {/* Color Selection */}
             {product.colors && product.colors.length > 0 && (
               <div className="mb-6">
                 <div className="flex items-center justify-between mb-2">
@@ -175,7 +182,6 @@ const ProductDetail = () => {
               </div>
             )}
             
-            {/* Size Selection */}
             {product.sizes && product.sizes.length > 0 && (
               <div className="mb-6">
                 <div className="flex items-center justify-between mb-2">
@@ -200,7 +206,6 @@ const ProductDetail = () => {
               </div>
             )}
             
-            {/* Quantity & Add to Cart */}
             <div className="flex flex-col sm:flex-row items-start gap-4 mb-6">
               <div className="flex items-center border rounded-md">
                 <button
@@ -236,7 +241,6 @@ const ProductDetail = () => {
               </Button>
             </div>
             
-            {/* Stock Status */}
             <div className="mb-6">
               {product.stock > 0 ? (
                 <p className="text-green-600 flex items-center">
@@ -251,7 +255,6 @@ const ProductDetail = () => {
               )}
             </div>
             
-            {/* Product Features */}
             <div className="space-y-3">
               <div className="flex items-center">
                 <Truck size={18} className="text-gray-600 mr-3" />
@@ -270,7 +273,6 @@ const ProductDetail = () => {
         </div>
       </div>
 
-      {/* Product Details Tabs */}
       <div className="mt-12">
         <Tabs defaultValue="description">
           <TabsList className="w-full justify-start border-b rounded-none bg-transparent h-auto p-0">
@@ -459,7 +461,6 @@ const ProductDetail = () => {
         </Tabs>
       </div>
 
-      {/* Related Products */}
       <div className="mt-16">
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-xl font-bold">You Might Also Like</h2>

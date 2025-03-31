@@ -1,3 +1,4 @@
+import { getStoredReviews, saveReviews } from "@/utils/localStorage";
 
 export type Product = {
   id: string;
@@ -214,7 +215,8 @@ export const products: Product[] = [
   }
 ];
 
-export const reviews: Review[] = [
+// Initial/default reviews
+const defaultReviews: Review[] = [
   {
     id: "r1",
     productId: "p1",
@@ -286,6 +288,25 @@ export const categories = [
   "Home"
 ];
 
+// Get reviews from localStorage or use defaults
+const getReviews = (): Review[] => {
+  const storedReviews = getStoredReviews();
+  // If no stored reviews found, initialize with defaults and save to localStorage
+  if (!storedReviews || storedReviews.length === 0) {
+    saveReviews(defaultReviews);
+    return defaultReviews;
+  }
+  return storedReviews;
+};
+
+// Add a new review
+export const addReview = (review: Review): Review[] => {
+  const currentReviews = getReviews();
+  const updatedReviews = [review, ...currentReviews];
+  saveReviews(updatedReviews);
+  return updatedReviews;
+};
+
 export function getProductById(id: string): Product | undefined {
   return products.find(product => product.id === id);
 }
@@ -300,5 +321,15 @@ export function getRelatedProducts(product: Product, limit: number = 4): Product
 }
 
 export function getProductReviews(productId: string): Review[] {
-  return reviews.filter(review => review.productId === productId);
+  const allReviews = getReviews();
+  return allReviews.filter(review => review.productId === productId);
+}
+
+// Helper function to recalculate product rating based on reviews
+export function recalculateProductRating(productId: string): number {
+  const productReviews = getProductReviews(productId);
+  if (productReviews.length === 0) return 0;
+  
+  const sum = productReviews.reduce((total, review) => total + review.rating, 0);
+  return parseFloat((sum / productReviews.length).toFixed(1));
 }
