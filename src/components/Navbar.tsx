@@ -45,6 +45,15 @@ const Navbar = () => {
           <Link to="/category/apparel" className="text-sm font-medium hover:text-primary transition-colors">Apparel</Link>
           <Link to="/category/electronics" className="text-sm font-medium hover:text-primary transition-colors">Electronics</Link>
           <Link to="/category/accessories" className="text-sm font-medium hover:text-primary transition-colors">Accessories</Link>
+          
+          {/* Make Add Product link always visible */}
+          <Link 
+            to="/add-product" 
+            className="text-sm font-medium text-green-600 hover:text-green-700 transition-colors flex items-center gap-1"
+          >
+            <PlusCircle size={16} />
+            Add Product
+          </Link>
         </nav>
 
         {/* Actions */}
@@ -62,9 +71,9 @@ const Navbar = () => {
               <SignedIn>
                 <Button 
                   asChild
-                  variant="ghost" 
+                  variant="success" 
                   size="sm"
-                  className="hidden md:flex items-center gap-1"
+                  className="hidden md:flex items-center gap-1 bg-green-600 hover:bg-green-700 text-white"
                 >
                   <Link to="/add-product">
                     <PlusCircle size={16} />
@@ -83,6 +92,18 @@ const Navbar = () => {
               </SignedIn>
               
               <SignedOut>
+                <Button 
+                  asChild
+                  variant="success" 
+                  size="sm"
+                  className="hidden md:flex items-center gap-1 bg-green-600 hover:bg-green-700 text-white"
+                >
+                  <Link to="/add-product">
+                    <PlusCircle size={16} />
+                    Add Product
+                  </Link>
+                </Button>
+                
                 <Button 
                   asChild
                   variant="default" 
@@ -108,9 +129,9 @@ const Navbar = () => {
             <>
               <Button 
                 asChild
-                variant="ghost" 
+                variant="success" 
                 size="sm"
-                className="hidden md:flex items-center gap-1"
+                className="hidden md:flex items-center gap-1 bg-green-600 hover:bg-green-700 text-white"
               >
                 <Link to="/add-product">
                   <PlusCircle size={16} />
@@ -190,13 +211,14 @@ const Navbar = () => {
               Accessories
             </Link>
             
+            {/* Make Add Product more prominent in mobile menu */}
             <Link 
               to="/add-product" 
-              className="flex items-center py-2 px-3 text-sm font-medium text-primary border border-primary hover:bg-primary/5 transition-colors rounded-md mb-2"
+              className="flex items-center py-2 px-3 text-sm font-medium text-white bg-green-600 hover:bg-green-700 transition-colors rounded-md mb-2"
               onClick={() => setIsMenuOpen(false)}
             >
               <PlusCircle size={18} className="mr-2" />
-              Add Product
+              Add Your Product
             </Link>
             
             <Link 

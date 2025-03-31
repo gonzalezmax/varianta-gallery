@@ -1,8 +1,9 @@
+
 import React from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { SignedIn, SignedOut } from "@clerk/clerk-react";
-import { LogIn } from "lucide-react";
+import { LogIn, PlusCircle } from "lucide-react";
 import ProductCard from "@/components/ProductCard";
 import { products } from "@/data/products";
 
@@ -53,7 +54,7 @@ const Index = () => {
               Explore our curated collection of premium products for every lifestyle.
             </p>
             
-            {/* Always show login buttons in hero section, regardless of Clerk availability */}
+            {/* Authentication and shopping buttons */}
             <div className="flex flex-col sm:flex-row gap-4 mb-8">
               <Button asChild size="lg" className="flex items-center gap-2">
                 <Link to="/sign-in">
@@ -66,9 +67,18 @@ const Index = () => {
               </Button>
             </div>
             
-            <Button asChild size="lg">
-              <Link to="/category/all">Shop Now</Link>
-            </Button>
+            <div className="flex flex-col sm:flex-row gap-4 mb-8">
+              {/* Add prominent Add Product button */}
+              <Button asChild size="lg" className="flex items-center gap-2 bg-green-600 hover:bg-green-700">
+                <Link to="/add-product">
+                  <PlusCircle size={20} />
+                  Add Your Product
+                </Link>
+              </Button>
+              <Button asChild size="lg">
+                <Link to="/category/all">Shop Now</Link>
+              </Button>
+            </div>
           </div>
           <div className="w-full md:w-1/2">
             <img
@@ -103,6 +113,20 @@ const Index = () => {
         </div>
       </section>
 
+      {/* Add Product CTA Section */}
+      <section className="bg-gradient-to-r from-primary/80 to-primary rounded-2xl py-12 px-8 mb-20 text-center">
+        <h2 className="text-3xl font-bold mb-4 text-white">Sell Your Products</h2>
+        <p className="text-lg text-white mb-8 max-w-2xl mx-auto">
+          Join our marketplace and start selling your products to thousands of customers today.
+        </p>
+        <Button asChild size="lg" variant="secondary" className="flex items-center gap-2 mx-auto">
+          <Link to="/add-product">
+            <PlusCircle size={20} />
+            Add Product Now
+          </Link>
+        </Button>
+      </section>
+
       {/* Featured Products */}
       <section className="mb-20">
         <h2 className="text-3xl font-bold mb-8">Featured Products</h2>
@@ -113,7 +137,7 @@ const Index = () => {
         </div>
       </section>
 
-      {/* Always show sign up CTA */}
+      {/* Sign up CTA */}
       <section className="bg-gray-50 rounded-2xl py-12 px-8 mb-20 text-center">
         <h2 className="text-3xl font-bold mb-4">Join Our Community</h2>
         <p className="text-lg text-gray-600 mb-8 max-w-2xl mx-auto">
