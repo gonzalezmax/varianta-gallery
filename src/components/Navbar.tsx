@@ -1,6 +1,7 @@
+
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Search, ShoppingBag, User, Menu, X, LogIn } from "lucide-react";
+import { Search, ShoppingBag, User, Menu, X, LogIn, PlusCircle } from "lucide-react";
 import { useCart } from "@/context/CartContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -59,6 +60,18 @@ const Navbar = () => {
           {isClerkAvailable ? (
             <>
               <SignedIn>
+                <Button 
+                  asChild
+                  variant="ghost" 
+                  size="sm"
+                  className="hidden md:flex items-center gap-1"
+                >
+                  <Link to="/add-product">
+                    <PlusCircle size={16} />
+                    Add Product
+                  </Link>
+                </Button>
+
                 <UserButton 
                   afterSignOutUrl="/"
                   appearance={{
@@ -92,17 +105,31 @@ const Navbar = () => {
               </SignedOut>
             </>
           ) : (
-            <Button 
-              asChild
-              variant="default" 
-              size="sm"
-              className="hidden md:flex items-center gap-2"
-            >
-              <Link to="/sign-in">
-                <LogIn size={16} />
-                Sign In
-              </Link>
-            </Button>
+            <>
+              <Button 
+                asChild
+                variant="ghost" 
+                size="sm"
+                className="hidden md:flex items-center gap-1"
+              >
+                <Link to="/add-product">
+                  <PlusCircle size={16} />
+                  Add Product
+                </Link>
+              </Button>
+              
+              <Button 
+                asChild
+                variant="default" 
+                size="sm"
+                className="hidden md:flex items-center gap-2"
+              >
+                <Link to="/sign-in">
+                  <LogIn size={16} />
+                  Sign In
+                </Link>
+              </Button>
+            </>
           )}
           
           <Link to="/cart" className="relative p-2 rounded-full hover:bg-gray-100 transition-colors">
@@ -161,6 +188,15 @@ const Navbar = () => {
               onClick={() => setIsMenuOpen(false)}
             >
               Accessories
+            </Link>
+            
+            <Link 
+              to="/add-product" 
+              className="flex items-center py-2 px-3 text-sm font-medium text-primary border border-primary hover:bg-primary/5 transition-colors rounded-md mb-2"
+              onClick={() => setIsMenuOpen(false)}
+            >
+              <PlusCircle size={18} className="mr-2" />
+              Add Product
             </Link>
             
             <Link 

@@ -19,6 +19,7 @@ import SearchResults from "./pages/SearchResults";
 import SignIn from "./pages/SignIn";
 import SignUp from "./pages/SignUp";
 import Account from "./pages/Account";
+import AddProduct from "./pages/AddProduct";
 
 const queryClient = new QueryClient();
 
@@ -57,6 +58,7 @@ const App = () => {
                   {/* Always render these routes, even if Clerk isn't available */}
                   <Route path="/sign-in/*" element={<SignIn />} />
                   <Route path="/sign-up/*" element={<SignUp />} />
+                  <Route path="/add-product" element={<AddProduct />} />
                   {isClerkAvailable && (
                     <Route path="/account" element={<Account />} />
                   )}

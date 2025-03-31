@@ -18,6 +18,7 @@ export type Product = {
   bestseller?: boolean;
   onSale?: boolean;
   discount?: number;
+  userId?: string;
 };
 
 export type Review = {
@@ -288,6 +289,204 @@ const mockReviews: Review[] = [
   }
 ];
 
+export async function getAllProducts(): Promise<Product[]> {
+  try {
+    const { data: userProducts, error: userProductsError } = await supabase
+      .from("user_products")
+      .select("*");
+
+    if (userProductsError) {
+      console.error("Error fetching user products:", userProductsError);
+      return products;
+    }
+
+    const userProductIds = userProducts.map(p => p.id);
+    
+    if (userProductIds.length === 0) {
+      return products;
+    }
+
+    const { data: productImages, error: imagesError } = await supabase
+      .from("product_images")
+      .select("*")
+      .in("product_id", userProductIds);
+
+    if (imagesError) {
+      console.error("Error fetching product images:", imagesError);
+    }
+
+    const { data: productColors, error: colorsError } = await supabase
+      .from("product_colors")
+      .select("*")
+      .in("product_id", userProductIds);
+
+    if (colorsError) {
+      console.error("Error fetching product colors:", colorsError);
+    }
+
+    const { data: productSizes, error: sizesError } = await supabase
+      .from("product_sizes")
+      .select("*")
+      .in("product_id", userProductIds);
+
+    if (sizesError) {
+      console.error("Error fetching product sizes:", sizesError);
+    }
+
+    const { data: productTags, error: tagsError } = await supabase
+      .from("product_tags")
+      .select("*")
+      .in("product_id", userProductIds);
+
+    if (tagsError) {
+      console.error("Error fetching product tags:", tagsError);
+    }
+
+    const formattedUserProducts = userProducts.map(product => {
+      const images = productImages
+        ? productImages
+            .filter(img => img.product_id === product.id)
+            .sort((a, b) => a.sort_order - b.sort_order)
+            .map(img => img.image_url)
+        : [];
+      
+      const colors = productColors
+        ? productColors
+            .filter(color => color.product_id === product.id)
+            .map(color => ({ name: color.name, hex: color.hex }))
+        : [];
+      
+      const sizes = productSizes
+        ? productSizes
+            .filter(size => size.product_id === product.id)
+            .map(size => size.size)
+        : [];
+      
+      const tags = productTags
+        ? productTags
+            .filter(tag => tag.product_id === product.id)
+            .map(tag => tag.tag)
+        : [];
+      
+      return {
+        id: product.id,
+        name: product.name,
+        description: product.description,
+        price: parseFloat(product.price as unknown as string),
+        images: images,
+        category: product.category,
+        brand: product.brand,
+        sizes: sizes.length > 0 ? sizes : undefined,
+        colors: colors.length > 0 ? colors : undefined,
+        tags: tags.length > 0 ? tags : undefined,
+        rating: parseFloat(product.rating as unknown as string),
+        reviewCount: product.review_count,
+        stock: product.stock,
+        bestseller: product.bestseller,
+        onSale: product.on_sale,
+        discount: product.discount || undefined,
+        userId: product.user_id
+      };
+    });
+
+    return [...products, ...formattedUserProducts];
+  } catch (error) {
+    console.error("Error in getAllProducts:", error);
+    return products;
+  }
+}
+
+export async function getProductById(id: string): Promise<Product | undefined> {
+  const staticProduct = products.find(product => product.id === id);
+  if (staticProduct) {
+    return staticProduct;
+  }
+
+  try {
+    const { data: product, error: productError } = await supabase
+      .from("user_products")
+      .select("*")
+      .eq("id", id)
+      .single();
+
+    if (productError || !product) {
+      console.error("Error fetching product:", productError);
+      return undefined;
+    }
+
+    const { data: images, error: imagesError } = await supabase
+      .from("product_images")
+      .select("*")
+      .eq("product_id", id)
+      .order("sort_order", { ascending: true });
+
+    if (imagesError) {
+      console.error("Error fetching product images:", imagesError);
+    }
+
+    const { data: colors, error: colorsError } = await supabase
+      .from("product_colors")
+      .select("*")
+      .eq("product_id", id);
+
+    if (colorsError) {
+      console.error("Error fetching product colors:", colorsError);
+    }
+
+    const { data: sizes, error: sizesError } = await supabase
+      .from("product_sizes")
+      .select("*")
+      .eq("product_id", id);
+
+    if (sizesError) {
+      console.error("Error fetching product sizes:", sizesError);
+    }
+
+    const { data: tags, error: tagsError } = await supabase
+      .from("product_tags")
+      .select("*")
+      .eq("product_id", id);
+
+    if (tagsError) {
+      console.error("Error fetching product tags:", tagsError);
+    }
+
+    return {
+      id: product.id,
+      name: product.name,
+      description: product.description,
+      price: parseFloat(product.price as unknown as string),
+      images: images ? images.map(img => img.image_url) : [],
+      category: product.category,
+      brand: product.brand,
+      sizes: sizes ? sizes.map(size => size.size) : undefined,
+      colors: colors ? colors.map(color => ({ name: color.name, hex: color.hex })) : undefined,
+      tags: tags ? tags.map(tag => tag.tag) : undefined,
+      rating: parseFloat(product.rating as unknown as string),
+      reviewCount: product.review_count,
+      stock: product.stock,
+      bestseller: product.bestseller,
+      onSale: product.on_sale,
+      discount: product.discount || undefined,
+      userId: product.user_id
+    };
+  } catch (error) {
+    console.error("Error in getProductById:", error);
+    return undefined;
+  }
+}
+
+export function getRelatedProducts(product: Product, limit: number = 4): Promise<Product[]> {
+  return getAllProducts().then(allProducts => {
+    return allProducts
+      .filter(p => 
+        p.id !== product.id && 
+        (p.category === product.category || p.brand === product.brand)
+      )
+      .slice(0, limit);
+  });
+}
+
 export const getReviews = async (): Promise<Review[]> => {
   try {
     const { data, error } = await supabase
@@ -347,15 +546,6 @@ export const addReview = async (review: Review): Promise<Review[]> => {
 
 export function getProductById(id: string): Product | undefined {
   return products.find(product => product.id === id);
-}
-
-export function getRelatedProducts(product: Product, limit: number = 4): Product[] {
-  return products
-    .filter(p => 
-      p.id !== product.id && 
-      (p.category === product.category || p.brand === product.brand)
-    )
-    .slice(0, limit);
 }
 
 export async function getProductReviews(productId: string): Promise<Review[]> {
