@@ -22,7 +22,8 @@ const SignIn = () => {
               socialButtonsBlockButton: "border rounded-md",
             },
           }}
-          socialAuth={{
+          // Use oauth property to specify social authentication providers
+          oauth={{
             strategy: "google",
           }}
         />
