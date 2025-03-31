@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useUser, useClerk, SignedIn, SignedOut, RedirectToSignIn } from "@clerk/clerk-react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -9,12 +9,32 @@ const Account = () => {
   const { user } = useUser();
   const { signOut } = useClerk();
   const navigate = useNavigate();
+  const [isClerkAvailable, setIsClerkAvailable] = useState(false);
+  
+  useEffect(() => {
+    // Check if we have a valid Clerk publishable key
+    const publishableKey = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
+    const isValidKey = publishableKey && 
+      publishableKey !== "pk_test_dummy-key-for-development" && 
+      !publishableKey.startsWith("pk_test_dummy");
+      
+    setIsClerkAvailable(isValidKey);
+    
+    // If Clerk is not available, redirect to home
+    if (!isValidKey) {
+      navigate("/");
+    }
+  }, [navigate]);
 
   const handleSignOut = async () => {
     await signOut();
     toast.success("Signed out successfully");
     navigate("/");
   };
+
+  if (!isClerkAvailable) {
+    return null;
+  }
 
   return (
     <>

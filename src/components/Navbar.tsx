@@ -4,14 +4,19 @@ import { Link, useNavigate } from "react-router-dom";
 import { Search, ShoppingBag, User, Menu, X, LogIn } from "lucide-react";
 import { useCart } from "@/context/CartContext";
 import { Button } from "@/components/ui/button";
-import { useUser, UserButton, SignedIn, SignedOut } from "@clerk/clerk-react";
+import { UserButton, SignedIn, SignedOut } from "@clerk/clerk-react";
 
 const Navbar = () => {
   const { getCartCount } = useCart();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
-  const { isLoaded, isSignedIn } = useUser();
   const navigate = useNavigate();
+
+  // Check if we have a valid Clerk publishable key
+  const publishableKey = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
+  const isClerkAvailable = publishableKey && 
+    publishableKey !== "pk_test_dummy-key-for-development" && 
+    !publishableKey.startsWith("pk_test_dummy");
 
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
   const toggleSearch = () => setIsSearchOpen(!isSearchOpen);
@@ -41,26 +46,38 @@ const Navbar = () => {
             <Search size={20} />
           </button>
           
-          <SignedIn>
-            <UserButton 
-              afterSignOutUrl="/"
-              appearance={{
-                elements: {
-                  userButtonBox: "p-2 rounded-full hover:bg-gray-100 transition-colors hidden md:flex",
-                }
-              }}
-            />
-          </SignedIn>
-          
-          <SignedOut>
+          {isClerkAvailable ? (
+            <>
+              <SignedIn>
+                <UserButton 
+                  afterSignOutUrl="/"
+                  appearance={{
+                    elements: {
+                      userButtonBox: "p-2 rounded-full hover:bg-gray-100 transition-colors hidden md:flex",
+                    }
+                  }}
+                />
+              </SignedIn>
+              
+              <SignedOut>
+                <Link 
+                  to="/sign-in" 
+                  className="p-2 rounded-full hover:bg-gray-100 transition-colors hidden md:flex"
+                  aria-label="Sign In"
+                >
+                  <LogIn size={20} />
+                </Link>
+              </SignedOut>
+            </>
+          ) : (
             <Link 
-              to="/sign-in" 
+              to="/" 
               className="p-2 rounded-full hover:bg-gray-100 transition-colors hidden md:flex"
-              aria-label="Sign In"
+              aria-label="Account"
             >
-              <LogIn size={20} />
+              <User size={20} />
             </Link>
-          </SignedOut>
+          )}
           
           <Link to="/cart" className="relative p-2 rounded-full hover:bg-gray-100 transition-colors">
             <ShoppingBag size={20} />
@@ -120,32 +137,44 @@ const Navbar = () => {
               Accessories
             </Link>
             
-            <SignedIn>
+            {isClerkAvailable ? (
+              <>
+                <SignedIn>
+                  <Link 
+                    to="/account" 
+                    className="block py-2 text-sm font-medium hover:text-primary transition-colors"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    My Account
+                  </Link>
+                </SignedIn>
+                
+                <SignedOut>
+                  <Link 
+                    to="/sign-in" 
+                    className="block py-2 text-sm font-medium hover:text-primary transition-colors"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    Sign In
+                  </Link>
+                  <Link 
+                    to="/sign-up" 
+                    className="block py-2 text-sm font-medium hover:text-primary transition-colors"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    Create Account
+                  </Link>
+                </SignedOut>
+              </>
+            ) : (
               <Link 
-                to="/account" 
+                to="/" 
                 className="block py-2 text-sm font-medium hover:text-primary transition-colors"
                 onClick={() => setIsMenuOpen(false)}
               >
-                My Account
+                Account (Auth Not Available)
               </Link>
-            </SignedIn>
-            
-            <SignedOut>
-              <Link 
-                to="/sign-in" 
-                className="block py-2 text-sm font-medium hover:text-primary transition-colors"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                Sign In
-              </Link>
-              <Link 
-                to="/sign-up" 
-                className="block py-2 text-sm font-medium hover:text-primary transition-colors"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                Create Account
-              </Link>
-            </SignedOut>
+            )}
           </div>
         </div>
       )}
