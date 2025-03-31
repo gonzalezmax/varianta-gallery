@@ -4,12 +4,14 @@ import { Link, useNavigate } from "react-router-dom";
 import { Search, ShoppingBag, User, Menu, X, LogIn } from "lucide-react";
 import { useCart } from "@/context/CartContext";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { UserButton, SignedIn, SignedOut } from "@clerk/clerk-react";
 
 const Navbar = () => {
   const { getCartCount } = useCart();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
   const navigate = useNavigate();
 
   // Check if we have a valid Clerk publishable key
@@ -20,6 +22,15 @@ const Navbar = () => {
 
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
   const toggleSearch = () => setIsSearchOpen(!isSearchOpen);
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      navigate(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
+      setIsSearchOpen(false);
+      setSearchQuery("");
+    }
+  };
 
   return (
     <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-sm border-b">
@@ -183,26 +194,60 @@ const Navbar = () => {
       {isSearchOpen && (
         <div className="absolute top-16 left-0 right-0 bg-white border-b shadow-md animate-fade-in">
           <div className="container mx-auto px-4 py-6">
-            <div className="relative">
-              <input
+            <form onSubmit={handleSearch} className="relative">
+              <Input
                 type="text"
                 placeholder="Search products..."
                 className="w-full border rounded-lg py-3 pl-4 pr-12 focus:outline-none focus:ring-2 focus:ring-primary"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
                 autoFocus
               />
-              <button className="absolute right-3 top-1/2 transform -translate-y-1/2 p-1 rounded-full hover:bg-gray-100">
+              <Button 
+                type="submit" 
+                variant="ghost" 
+                size="icon" 
+                className="absolute right-3 top-1/2 transform -translate-y-1/2 p-1 rounded-full hover:bg-gray-100"
+              >
                 <Search size={20} />
-              </button>
-            </div>
+              </Button>
+            </form>
             <div className="mt-4 flex flex-wrap gap-2">
               <span className="text-sm text-muted-foreground">Popular:</span>
-              <Button variant="outline" size="sm" className="text-sm" onClick={() => setIsSearchOpen(false)}>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="text-sm" 
+                onClick={() => {
+                  setSearchQuery("running shoes");
+                  navigate("/search?q=running+shoes");
+                  setIsSearchOpen(false);
+                }}
+              >
                 Running shoes
               </Button>
-              <Button variant="outline" size="sm" className="text-sm" onClick={() => setIsSearchOpen(false)}>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="text-sm" 
+                onClick={() => {
+                  setSearchQuery("wireless headphones");
+                  navigate("/search?q=wireless+headphones");
+                  setIsSearchOpen(false);
+                }}
+              >
                 Wireless headphones
               </Button>
-              <Button variant="outline" size="sm" className="text-sm" onClick={() => setIsSearchOpen(false)}>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="text-sm" 
+                onClick={() => {
+                  setSearchQuery("leather jacket");
+                  navigate("/search?q=leather+jacket");
+                  setIsSearchOpen(false);
+                }}
+              >
                 Leather jacket
               </Button>
             </div>

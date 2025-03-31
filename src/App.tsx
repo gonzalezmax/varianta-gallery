@@ -15,6 +15,7 @@ import Cart from "./pages/Cart";
 import Checkout from "./pages/Checkout";
 import OrderConfirmation from "./pages/OrderConfirmation";
 import CategoryPage from "./pages/CategoryPage";
+import SearchResults from "./pages/SearchResults";
 import SignIn from "./pages/SignIn";
 import SignUp from "./pages/SignUp";
 import Account from "./pages/Account";
@@ -52,6 +53,7 @@ const App = () => {
                   <Route path="/checkout" element={<Checkout />} />
                   <Route path="/order-confirmation" element={<OrderConfirmation />} />
                   <Route path="/category/:category" element={<CategoryPage />} />
+                  <Route path="/search" element={<SearchResults />} />
                   {isClerkAvailable && (
                     <>
                       <Route path="/sign-in/*" element={<SignIn />} />
