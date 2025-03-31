@@ -73,7 +73,7 @@ const Navbar = () => {
               <SignedOut>
                 <Button 
                   asChild
-                  variant="outline" 
+                  variant="primary" 
                   size="sm"
                   className="hidden md:flex items-center gap-2"
                 >
@@ -175,7 +175,7 @@ const Navbar = () => {
                 <SignedOut>
                   <Link 
                     to="/sign-in" 
-                    className="flex items-center py-2 px-3 text-sm font-medium hover:text-primary transition-colors bg-gray-100 rounded-md"
+                    className="flex items-center py-2 px-3 text-sm font-medium text-white bg-primary hover:bg-primary/90 transition-colors rounded-md"
                     onClick={() => setIsMenuOpen(false)}
                   >
                     <LogIn size={18} className="mr-2" />
