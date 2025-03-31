@@ -1,12 +1,11 @@
-
 import React, { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { Truck, Shield, RotateCcw, Star, ChevronRight, ChevronDown, Heart, Share2 } from "lucide-react";
+import { Truck, Shield, RotateCcw, ChevronRight, ChevronDown, Heart, Share2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
-import { getProductById, getProductReviews, getRelatedProducts } from "@/data/products";
+import { getProductById, getProductReviews, getRelatedProducts, Review } from "@/data/products";
 import { useCart } from "@/context/CartContext";
 import ProductCard from "@/components/ProductCard";
 import Rating from "@/components/Rating";
@@ -18,7 +17,8 @@ const ProductDetail = () => {
   const { addToCart } = useCart();
 
   const product = id ? getProductById(id) : undefined;
-  const reviews = id ? getProductReviews(id) : [];
+  const initialReviews = id ? getProductReviews(id) : [];
+  const [reviews, setReviews] = useState<Review[]>(initialReviews);
   const relatedProducts = product ? getRelatedProducts(product, 4) : [];
 
   const [selectedImage, setSelectedImage] = useState(0);
@@ -60,9 +60,9 @@ const ProductDetail = () => {
     }
   };
 
-  const handleReviewSubmitted = () => {
+  const handleReviewSubmitted = (newReview: Review) => {
+    setReviews(prevReviews => [newReview, ...prevReviews]);
     setShowReviewForm(false);
-    // In a real app, you would refresh the reviews here
   };
 
   return (
@@ -380,7 +380,7 @@ const ProductDetail = () => {
                   <h3 className="text-xl font-semibold">Customer Reviews</h3>
                   <div className="flex items-center mt-1">
                     <Rating value={product.rating} showText size="lg" />
-                    <span className="ml-2 text-gray-500">Based on {product.reviewCount} reviews</span>
+                    <span className="ml-2 text-gray-500">Based on {reviews.length} reviews</span>
                   </div>
                 </div>
                 <Button onClick={() => setShowReviewForm(!showReviewForm)}>

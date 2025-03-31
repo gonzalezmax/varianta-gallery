@@ -10,6 +10,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
+import { Review } from "@/data/products";
 
 const reviewSchema = z.object({
   title: z.string().min(3, { message: "Title must be at least 3 characters" }).max(100),
@@ -22,7 +23,7 @@ type ReviewFormValues = z.infer<typeof reviewSchema>;
 
 interface ReviewFormProps {
   productId: string;
-  onReviewSubmitted: () => void;
+  onReviewSubmitted: (review: Review) => void;
   onCancel: () => void;
 }
 
@@ -42,16 +43,28 @@ const ReviewForm: React.FC<ReviewFormProps> = ({ productId, onReviewSubmitted, o
   const selectedRating = form.watch("rating");
 
   const onSubmit = (data: ReviewFormValues) => {
-    // Here we would typically send the data to an API
-    console.log("Submitting review:", { productId, ...data });
+    // Create a new review object
+    const newReview: Review = {
+      id: `r${Date.now()}`, // Generate a unique ID using timestamp
+      productId,
+      userName: "You", // Default to "You" for the current user
+      rating: data.rating,
+      date: new Date().toISOString().split('T')[0], // Format: YYYY-MM-DD
+      title: data.title,
+      comment: data.comment,
+      recommended: data.recommended,
+      verified: true, // Assume the current user is verified
+    };
     
-    // For now, we'll just simulate a successful submission
+    console.log("Submitting review:", newReview);
+    
+    // Show success toast
     toast.success("Review submitted successfully", {
       description: "Thank you for your feedback!",
     });
     
-    // Notify parent component that review was submitted
-    onReviewSubmitted();
+    // Pass the new review to parent component
+    onReviewSubmitted(newReview);
   };
 
   const renderStar = (rating: number) => {

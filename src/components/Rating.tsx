@@ -56,13 +56,21 @@ const Rating: React.FC<RatingProps> = ({
             size={starSizes[size]}
             className={cn(
               interactive && "cursor-pointer",
-              "text-yellow-400",
-              type === "full" && "fill-yellow-400",
-              type === "half" && "fill-gradient-to-r from-yellow-400 to-transparent",
-              type === "empty" && "text-gray-300"
+              type === "full" ? "text-yellow-400 fill-yellow-400" : 
+              type === "half" ? "text-yellow-400 fill-[url(#halfStar)]" : 
+              "text-gray-300"
             )}
             onClick={() => handleStarClick(i)}
-          />
+          >
+            {type === "half" && (
+              <defs>
+                <linearGradient id="halfStar" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="50%" stopColor="#FACC15" />
+                  <stop offset="50%" stopColor="transparent" stopOpacity="0" />
+                </linearGradient>
+              </defs>
+            )}
+          </Star>
         ))}
       </div>
       {showText && (
