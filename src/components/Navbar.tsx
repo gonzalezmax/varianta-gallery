@@ -73,7 +73,7 @@ const Navbar = () => {
               <SignedOut>
                 <Button 
                   asChild
-                  variant="primary" 
+                  variant="default" 
                   size="sm"
                   className="hidden md:flex items-center gap-2"
                 >
