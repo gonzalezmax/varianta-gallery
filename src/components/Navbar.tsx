@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Search, ShoppingBag, User, Menu, X, LogIn } from "lucide-react";
@@ -93,13 +92,17 @@ const Navbar = () => {
               </SignedOut>
             </>
           ) : (
-            <Link 
-              to="/" 
-              className="p-2 rounded-full hover:bg-gray-100 transition-colors hidden md:flex"
-              aria-label="Account"
+            <Button 
+              asChild
+              variant="default" 
+              size="sm"
+              className="hidden md:flex items-center gap-2"
             >
-              <User size={20} />
-            </Link>
+              <Link to="/sign-in">
+                <LogIn size={16} />
+                Sign In
+              </Link>
+            </Button>
           )}
           
           <Link to="/cart" className="relative p-2 rounded-full hover:bg-gray-100 transition-colors">
@@ -160,38 +163,14 @@ const Navbar = () => {
               Accessories
             </Link>
             
-            {isClerkAvailable ? (
-              <>
-                <SignedIn>
-                  <Link 
-                    to="/account" 
-                    className="block py-2 text-sm font-medium hover:text-primary transition-colors"
-                    onClick={() => setIsMenuOpen(false)}
-                  >
-                    My Account
-                  </Link>
-                </SignedIn>
-                
-                <SignedOut>
-                  <Link 
-                    to="/sign-in" 
-                    className="flex items-center py-2 px-3 text-sm font-medium text-white bg-primary hover:bg-primary/90 transition-colors rounded-md"
-                    onClick={() => setIsMenuOpen(false)}
-                  >
-                    <LogIn size={18} className="mr-2" />
-                    Sign In / Create Account
-                  </Link>
-                </SignedOut>
-              </>
-            ) : (
-              <Link 
-                to="/" 
-                className="block py-2 text-sm font-medium hover:text-primary transition-colors"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                Account (Auth Not Available)
-              </Link>
-            )}
+            <Link 
+              to="/sign-in" 
+              className="flex items-center py-2 px-3 text-sm font-medium text-white bg-primary hover:bg-primary/90 transition-colors rounded-md"
+              onClick={() => setIsMenuOpen(false)}
+            >
+              <LogIn size={18} className="mr-2" />
+              Sign In / Create Account
+            </Link>
           </div>
         </div>
       )}

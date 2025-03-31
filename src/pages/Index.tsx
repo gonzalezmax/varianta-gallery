@@ -53,21 +53,18 @@ const Index = () => {
               Explore our curated collection of premium products for every lifestyle.
             </p>
             
-            {isClerkAvailable && (
-              <SignedOut>
-                <div className="flex flex-col sm:flex-row gap-4 mb-8">
-                  <Button asChild size="lg" className="flex items-center gap-2">
-                    <Link to="/sign-in">
-                      <LogIn size={20} />
-                      Sign In
-                    </Link>
-                  </Button>
-                  <Button asChild variant="outline" size="lg">
-                    <Link to="/sign-up">Create Account</Link>
-                  </Button>
-                </div>
-              </SignedOut>
-            )}
+            {/* Always show login buttons in hero section, regardless of Clerk availability */}
+            <div className="flex flex-col sm:flex-row gap-4 mb-8">
+              <Button asChild size="lg" className="flex items-center gap-2">
+                <Link to="/sign-in">
+                  <LogIn size={20} />
+                  Sign In
+                </Link>
+              </Button>
+              <Button asChild variant="outline" size="lg">
+                <Link to="/sign-up">Create Account</Link>
+              </Button>
+            </div>
             
             <Button asChild size="lg">
               <Link to="/category/all">Shop Now</Link>
@@ -116,28 +113,24 @@ const Index = () => {
         </div>
       </section>
 
-      {/* Add CTA for signing up */}
-      {isClerkAvailable && (
-        <SignedOut>
-          <section className="bg-gray-50 rounded-2xl py-12 px-8 mb-20 text-center">
-            <h2 className="text-3xl font-bold mb-4">Join Our Community</h2>
-            <p className="text-lg text-gray-600 mb-8 max-w-2xl mx-auto">
-              Create an account to enjoy personalized shopping experiences, order tracking, and exclusive offers.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button asChild size="lg" className="flex items-center gap-2">
-                <Link to="/sign-in">
-                  <LogIn size={20} />
-                  Sign In
-                </Link>
-              </Button>
-              <Button asChild variant="outline" size="lg">
-                <Link to="/sign-up">Create Account</Link>
-              </Button>
-            </div>
-          </section>
-        </SignedOut>
-      )}
+      {/* Always show sign up CTA */}
+      <section className="bg-gray-50 rounded-2xl py-12 px-8 mb-20 text-center">
+        <h2 className="text-3xl font-bold mb-4">Join Our Community</h2>
+        <p className="text-lg text-gray-600 mb-8 max-w-2xl mx-auto">
+          Create an account to enjoy personalized shopping experiences, order tracking, and exclusive offers.
+        </p>
+        <div className="flex flex-col sm:flex-row gap-4 justify-center">
+          <Button asChild size="lg" className="flex items-center gap-2">
+            <Link to="/sign-in">
+              <LogIn size={20} />
+              Sign In
+            </Link>
+          </Button>
+          <Button asChild variant="outline" size="lg">
+            <Link to="/sign-up">Create Account</Link>
+          </Button>
+        </div>
+      </section>
 
       {/* Benefits Section */}
       <section className="mb-20">
