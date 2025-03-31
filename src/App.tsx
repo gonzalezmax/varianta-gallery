@@ -5,7 +5,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { CartProvider } from "@/context/CartContext";
-import { ClerkLoaded, ClerkLoading } from "@clerk/clerk-react";
+import { useEffect, useState } from "react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import Index from "./pages/Index";
@@ -21,17 +21,27 @@ import Account from "./pages/Account";
 
 const queryClient = new QueryClient();
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <CartProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <ClerkLoading>
-            <div className="h-1 bg-primary animate-pulse fixed top-0 left-0 right-0 z-50"></div>
-          </ClerkLoading>
-          <ClerkLoaded>
+const App = () => {
+  // Check if Clerk is available based on environment variable
+  const [isClerkAvailable, setIsClerkAvailable] = useState(false);
+  
+  useEffect(() => {
+    // Check if we have a valid Clerk publishable key
+    const publishableKey = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
+    const isValidKey = publishableKey && 
+      publishableKey !== "pk_test_dummy-key-for-development" && 
+      !publishableKey.startsWith("pk_test_dummy");
+      
+    setIsClerkAvailable(isValidKey);
+  }, []);
+
+  return (
+    <QueryClientProvider client={queryClient}>
+      <TooltipProvider>
+        <CartProvider>
+          <Toaster />
+          <Sonner />
+          <BrowserRouter>
             <div className="flex flex-col min-h-screen">
               <Navbar />
               <main className="flex-1 pb-12">
@@ -42,19 +52,23 @@ const App = () => (
                   <Route path="/checkout" element={<Checkout />} />
                   <Route path="/order-confirmation" element={<OrderConfirmation />} />
                   <Route path="/category/:category" element={<CategoryPage />} />
-                  <Route path="/sign-in/*" element={<SignIn />} />
-                  <Route path="/sign-up/*" element={<SignUp />} />
-                  <Route path="/account" element={<Account />} />
+                  {isClerkAvailable && (
+                    <>
+                      <Route path="/sign-in/*" element={<SignIn />} />
+                      <Route path="/sign-up/*" element={<SignUp />} />
+                      <Route path="/account" element={<Account />} />
+                    </>
+                  )}
                   <Route path="*" element={<NotFound />} />
                 </Routes>
               </main>
               <Footer />
             </div>
-          </ClerkLoaded>
-        </BrowserRouter>
-      </CartProvider>
-    </TooltipProvider>
-  </QueryClientProvider>
-);
+          </BrowserRouter>
+        </CartProvider>
+      </TooltipProvider>
+    </QueryClientProvider>
+  );
+};
 
 export default App;
