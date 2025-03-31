@@ -22,10 +22,6 @@ const SignUp = () => {
               socialButtonsBlockButton: "border rounded-md",
             },
           }}
-          // Use oauth property to specify social authentication providers
-          oauth={{
-            strategy: "google",
-          }}
         />
       </div>
     </div>

@@ -71,9 +71,21 @@ const Navbar = () => {
               </SignedIn>
               
               <SignedOut>
+                <Button 
+                  asChild
+                  variant="outline" 
+                  size="sm"
+                  className="hidden md:flex items-center gap-2"
+                >
+                  <Link to="/sign-in">
+                    <LogIn size={16} />
+                    Sign In
+                  </Link>
+                </Button>
+                
                 <Link 
                   to="/sign-in" 
-                  className="p-2 rounded-full hover:bg-gray-100 transition-colors hidden md:flex"
+                  className="p-2 rounded-full hover:bg-gray-100 transition-colors md:hidden"
                   aria-label="Sign In"
                 >
                   <LogIn size={20} />
@@ -163,17 +175,11 @@ const Navbar = () => {
                 <SignedOut>
                   <Link 
                     to="/sign-in" 
-                    className="block py-2 text-sm font-medium hover:text-primary transition-colors"
+                    className="flex items-center py-2 px-3 text-sm font-medium hover:text-primary transition-colors bg-gray-100 rounded-md"
                     onClick={() => setIsMenuOpen(false)}
                   >
-                    Sign In
-                  </Link>
-                  <Link 
-                    to="/sign-up" 
-                    className="block py-2 text-sm font-medium hover:text-primary transition-colors"
-                    onClick={() => setIsMenuOpen(false)}
-                  >
-                    Create Account
+                    <LogIn size={18} className="mr-2" />
+                    Sign In / Create Account
                   </Link>
                 </SignedOut>
               </>
