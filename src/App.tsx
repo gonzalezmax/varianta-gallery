@@ -54,12 +54,11 @@ const App = () => {
                   <Route path="/order-confirmation" element={<OrderConfirmation />} />
                   <Route path="/category/:category" element={<CategoryPage />} />
                   <Route path="/search" element={<SearchResults />} />
+                  {/* Always render these routes, even if Clerk isn't available */}
+                  <Route path="/sign-in/*" element={<SignIn />} />
+                  <Route path="/sign-up/*" element={<SignUp />} />
                   {isClerkAvailable && (
-                    <>
-                      <Route path="/sign-in/*" element={<SignIn />} />
-                      <Route path="/sign-up/*" element={<SignUp />} />
-                      <Route path="/account" element={<Account />} />
-                    </>
+                    <Route path="/account" element={<Account />} />
                   )}
                   <Route path="*" element={<NotFound />} />
                 </Routes>
