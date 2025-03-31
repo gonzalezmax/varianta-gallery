@@ -1,4 +1,5 @@
-import { getStoredReviews, saveReviews } from "@/utils/localStorage";
+
+import { supabase } from "@/integrations/supabase/client";
 
 export type Product = {
   id: string;
@@ -288,23 +289,64 @@ export const categories = [
   "Home"
 ];
 
-// Get reviews from localStorage or use defaults
-const getReviews = (): Review[] => {
-  const storedReviews = getStoredReviews();
-  // If no stored reviews found, initialize with defaults and save to localStorage
-  if (!storedReviews || storedReviews.length === 0) {
-    saveReviews(defaultReviews);
-    return defaultReviews;
+// Get reviews from Supabase
+const getReviews = async (): Promise<Review[]> => {
+  try {
+    const { data, error } = await supabase
+      .from('reviews')
+      .select('*');
+    
+    if (error) {
+      console.error('Error fetching reviews:', error);
+      return [];
+    }
+    
+    return data.map((review: any) => ({
+      id: review.id,
+      productId: review.product_id,
+      userName: review.user_name,
+      userImage: review.user_image,
+      rating: review.rating,
+      date: review.date,
+      title: review.title,
+      comment: review.comment,
+      recommended: review.recommended,
+      verified: review.verified
+    }));
+  } catch (error) {
+    console.error('Error in getReviews:', error);
+    return [];
   }
-  return storedReviews;
 };
 
-// Add a new review
-export const addReview = (review: Review): Review[] => {
-  const currentReviews = getReviews();
-  const updatedReviews = [review, ...currentReviews];
-  saveReviews(updatedReviews);
-  return updatedReviews;
+// Add a new review to Supabase
+export const addReview = async (review: Review): Promise<Review[]> => {
+  try {
+    const { error } = await supabase
+      .from('reviews')
+      .insert([{
+        product_id: review.productId,
+        user_name: review.userName,
+        user_image: review.userImage,
+        rating: review.rating,
+        date: review.date,
+        title: review.title,
+        comment: review.comment,
+        recommended: review.recommended,
+        verified: review.verified
+      }]);
+    
+    if (error) {
+      console.error('Error adding review:', error);
+      return [];
+    }
+    
+    // After inserting, get all reviews again to return the updated list
+    return getProductReviews(review.productId);
+  } catch (error) {
+    console.error('Error in addReview:', error);
+    return [];
+  }
 };
 
 export function getProductById(id: string): Product | undefined {
@@ -320,14 +362,40 @@ export function getRelatedProducts(product: Product, limit: number = 4): Product
     .slice(0, limit);
 }
 
-export function getProductReviews(productId: string): Review[] {
-  const allReviews = getReviews();
-  return allReviews.filter(review => review.productId === productId);
+export async function getProductReviews(productId: string): Promise<Review[]> {
+  try {
+    const { data, error } = await supabase
+      .from('reviews')
+      .select('*')
+      .eq('product_id', productId)
+      .order('created_at', { ascending: false });
+    
+    if (error) {
+      console.error('Error fetching product reviews:', error);
+      return [];
+    }
+    
+    return data.map((review: any) => ({
+      id: review.id,
+      productId: review.product_id,
+      userName: review.user_name,
+      userImage: review.user_image,
+      rating: review.rating,
+      date: review.date,
+      title: review.title,
+      comment: review.comment,
+      recommended: review.recommended,
+      verified: review.verified
+    }));
+  } catch (error) {
+    console.error('Error in getProductReviews:', error);
+    return [];
+  }
 }
 
 // Helper function to recalculate product rating based on reviews
-export function recalculateProductRating(productId: string): number {
-  const productReviews = getProductReviews(productId);
+export async function recalculateProductRating(productId: string): Promise<number> {
+  const productReviews = await getProductReviews(productId);
   if (productReviews.length === 0) return 0;
   
   const sum = productReviews.reduce((total, review) => total + review.rating, 0);

@@ -17,10 +17,10 @@ const ProductDetail = () => {
   const { addToCart } = useCart();
 
   const product = id ? getProductById(id) : undefined;
-  const initialReviews = id ? getProductReviews(id) : [];
-  const [reviews, setReviews] = useState<Review[]>(initialReviews);
   const relatedProducts = product ? getRelatedProducts(product, 4) : [];
 
+  const [reviews, setReviews] = useState<Review[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [selectedImage, setSelectedImage] = useState(0);
   const [selectedColor, setSelectedColor] = useState(product?.colors?.[0]?.name || "");
   const [selectedSize, setSelectedSize] = useState(product?.sizes?.[0] || "");
@@ -29,7 +29,20 @@ const ProductDetail = () => {
 
   useEffect(() => {
     if (id) {
-      setReviews(getProductReviews(id));
+      const fetchReviews = async () => {
+        setIsLoading(true);
+        try {
+          const reviewsData = await getProductReviews(id);
+          setReviews(reviewsData);
+        } catch (error) {
+          console.error("Error fetching reviews:", error);
+          toast.error("Failed to load reviews");
+        } finally {
+          setIsLoading(false);
+        }
+      };
+      
+      fetchReviews();
     }
   }, [id]);
 
@@ -66,14 +79,21 @@ const ProductDetail = () => {
     }
   };
 
-  const handleReviewSubmitted = (newReview: Review) => {
-    const updatedReviews = addReview(newReview);
-    setReviews(updatedReviews.filter(review => review.productId === id));
-    setShowReviewForm(false);
-    
-    toast.success("Review submitted successfully", {
-      description: "Your review has been saved and will be visible even after refreshing the page.",
-    });
+  const handleReviewSubmitted = async (newReview: Review) => {
+    try {
+      const updatedReviews = await addReview(newReview);
+      setReviews(updatedReviews);
+      setShowReviewForm(false);
+      
+      toast.success("Review submitted successfully", {
+        description: "Your review has been saved and will be visible to all users.",
+      });
+    } catch (error) {
+      console.error("Error submitting review:", error);
+      toast.error("Failed to submit review", {
+        description: "Please try again later.",
+      });
+    }
   };
 
   return (
@@ -295,6 +315,7 @@ const ProductDetail = () => {
               Reviews ({reviews.length})
             </TabsTrigger>
           </TabsList>
+          
           <TabsContent value="description" className="pt-6">
             <div className="prose max-w-none">
               <p className="mb-4">
@@ -317,6 +338,7 @@ const ProductDetail = () => {
               </ul>
             </div>
           </TabsContent>
+          
           <TabsContent value="specs" className="pt-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
@@ -375,6 +397,7 @@ const ProductDetail = () => {
               </div>
             </div>
           </TabsContent>
+          
           <TabsContent value="reviews" className="pt-6">
             <div className="mb-8">
               <div className="flex items-center justify-between mb-6">
@@ -400,62 +423,73 @@ const ProductDetail = () => {
                 </div>
               )}
               
-              <div className="space-y-6">
-                {reviews.map((review) => (
-                  <div key={review.id} className="border-b pb-6">
-                    <div className="flex items-start justify-between mb-2">
-                      <div className="flex items-center">
-                        {review.userImage ? (
-                          <img
-                            src={review.userImage}
-                            alt={review.userName}
-                            className="w-10 h-10 rounded-full mr-3"
-                          />
-                        ) : (
-                          <div className="w-10 h-10 rounded-full bg-gray-200 mr-3 flex items-center justify-center">
-                            <span className="font-medium text-gray-600">
-                              {review.userName.charAt(0)}
-                            </span>
-                          </div>
-                        )}
-                        <div>
-                          <h4 className="font-medium">{review.userName}</h4>
-                          <div className="flex items-center mt-1">
-                            <Rating value={review.rating} size="sm" />
-                            {review.verified && (
-                              <span className="ml-2 bg-green-100 text-green-800 text-xs px-1.5 py-0.5 rounded">
-                                Verified Purchase
+              {isLoading ? (
+                <div className="py-8 text-center">
+                  <p className="text-gray-500">Loading reviews...</p>
+                </div>
+              ) : reviews.length > 0 ? (
+                <div className="space-y-6">
+                  {reviews.map((review) => (
+                    <div key={review.id} className="border-b pb-6">
+                      <div className="flex items-start justify-between mb-2">
+                        <div className="flex items-center">
+                          {review.userImage ? (
+                            <img
+                              src={review.userImage}
+                              alt={review.userName}
+                              className="w-10 h-10 rounded-full mr-3"
+                            />
+                          ) : (
+                            <div className="w-10 h-10 rounded-full bg-gray-200 mr-3 flex items-center justify-center">
+                              <span className="font-medium text-gray-600">
+                                {review.userName.charAt(0)}
                               </span>
-                            )}
+                            </div>
+                          )}
+                          <div>
+                            <h4 className="font-medium">{review.userName}</h4>
+                            <div className="flex items-center mt-1">
+                              <Rating value={review.rating} size="sm" />
+                              {review.verified && (
+                                <span className="ml-2 bg-green-100 text-green-800 text-xs px-1.5 py-0.5 rounded">
+                                  Verified Purchase
+                                </span>
+                              )}
+                            </div>
                           </div>
                         </div>
+                        <span className="text-sm text-gray-500">{review.date}</span>
                       </div>
-                      <span className="text-sm text-gray-500">{review.date}</span>
+                      <h5 className="font-semibold mt-3 mb-1">{review.title}</h5>
+                      <p className="text-gray-700 mb-2">{review.comment}</p>
+                      {review.recommended && (
+                        <div className="flex items-center text-green-600 text-sm">
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            className="h-4 w-4 mr-1"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M5 13l4 4L19 7"
+                            />
+                          </svg>
+                          <span>I recommend this product</span>
+                        </div>
+                      )}
                     </div>
-                    <h5 className="font-semibold mt-3 mb-1">{review.title}</h5>
-                    <p className="text-gray-700 mb-2">{review.comment}</p>
-                    {review.recommended && (
-                      <div className="flex items-center text-green-600 text-sm">
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          className="h-4 w-4 mr-1"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                          stroke="currentColor"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M5 13l4 4L19 7"
-                          />
-                        </svg>
-                        <span>I recommend this product</span>
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="py-8 text-center border rounded-lg">
+                  <p className="text-gray-500 mb-2">No reviews yet</p>
+                  <p className="text-sm text-gray-400">Be the first to review this product</p>
+                </div>
+              )}
             </div>
           </TabsContent>
         </Tabs>
