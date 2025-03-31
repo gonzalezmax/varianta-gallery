@@ -9,6 +9,8 @@ interface RatingProps {
   size?: "sm" | "md" | "lg";
   showText?: boolean;
   className?: string;
+  interactive?: boolean;
+  onChange?: (value: number) => void;
 }
 
 const Rating: React.FC<RatingProps> = ({
@@ -17,6 +19,8 @@ const Rating: React.FC<RatingProps> = ({
   size = "md",
   showText = false,
   className,
+  interactive = false,
+  onChange,
 }) => {
   const starSizes = {
     sm: 14,
@@ -37,6 +41,12 @@ const Rating: React.FC<RatingProps> = ({
     return "empty";
   });
 
+  const handleStarClick = (index: number) => {
+    if (interactive && onChange) {
+      onChange(index + 1);
+    }
+  };
+
   return (
     <div className={cn("flex items-center", className)}>
       <div className="flex">
@@ -45,11 +55,13 @@ const Rating: React.FC<RatingProps> = ({
             key={i}
             size={starSizes[size]}
             className={cn(
+              interactive && "cursor-pointer",
               "text-yellow-400",
               type === "full" && "fill-yellow-400",
               type === "half" && "fill-gradient-to-r from-yellow-400 to-transparent",
               type === "empty" && "text-gray-300"
             )}
+            onClick={() => handleStarClick(i)}
           />
         ))}
       </div>

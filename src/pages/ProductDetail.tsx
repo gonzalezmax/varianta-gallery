@@ -10,6 +10,7 @@ import { getProductById, getProductReviews, getRelatedProducts } from "@/data/pr
 import { useCart } from "@/context/CartContext";
 import ProductCard from "@/components/ProductCard";
 import Rating from "@/components/Rating";
+import ReviewForm from "@/components/ReviewForm";
 
 const ProductDetail = () => {
   const { id } = useParams<{ id: string }>();
@@ -24,6 +25,7 @@ const ProductDetail = () => {
   const [selectedColor, setSelectedColor] = useState(product?.colors?.[0]?.name || "");
   const [selectedSize, setSelectedSize] = useState(product?.sizes?.[0] || "");
   const [quantity, setQuantity] = useState(1);
+  const [showReviewForm, setShowReviewForm] = useState(false);
 
   if (!product) {
     return (
@@ -56,6 +58,11 @@ const ProductDetail = () => {
         },
       });
     }
+  };
+
+  const handleReviewSubmitted = () => {
+    setShowReviewForm(false);
+    // In a real app, you would refresh the reviews here
   };
 
   return (
@@ -376,8 +383,20 @@ const ProductDetail = () => {
                     <span className="ml-2 text-gray-500">Based on {product.reviewCount} reviews</span>
                   </div>
                 </div>
-                <Button>Write a Review</Button>
+                <Button onClick={() => setShowReviewForm(!showReviewForm)}>
+                  {showReviewForm ? "Cancel Review" : "Write a Review"}
+                </Button>
               </div>
+              
+              {showReviewForm && (
+                <div className="mb-8">
+                  <ReviewForm 
+                    productId={product.id} 
+                    onReviewSubmitted={handleReviewSubmitted}
+                    onCancel={() => setShowReviewForm(false)}
+                  />
+                </div>
+              )}
               
               <div className="space-y-6">
                 {reviews.map((review) => (
